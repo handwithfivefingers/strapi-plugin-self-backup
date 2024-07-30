@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "Backup Setting",
+  "info": {
+    "singularName": "backup-setting",
+    "pluralName": "backup-settings",
+    "displayName": "backup-setting"
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "options": {
+    "draftAndPublish": false,
+    "comment": ""
+  },
+  "attributes": {
+    "identifier": {
+      "type": "string",
+      "required": true
+    },
+    "size": {
+      "type": "float"
+    },
+    "backupPath": {
+      "type": "string"
+    },
+    "hasDB": {
+      "type": "boolean",
+      "default": false
+    },
+    "hasUploads": {
+      "type": "boolean",
+      "default": false
+    },
+    "manual": {
+      "type": "boolean",
+      "default": false
+    },
+    "dbEngine": {
+      "type": "string"
+    }
+  }
+}

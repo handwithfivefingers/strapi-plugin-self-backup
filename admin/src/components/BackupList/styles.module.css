@@ -1,0 +1,29 @@
+.switch > div > div {
+  background-color: rgba(123, 121, 255, 0.35);
+  height: 1.2rem;
+  width: 2.3rem;
+  &:before {
+    top: 2px;
+    left: 2px;
+  }
+}
+
+.tableWrapper {
+  display: flex;
+  width: inherit;
+  overflow: auto;
+}
+.table {
+  & td,
+  & th div {
+    padding: 8px 4px;
+    /* width: 20%; */
+    text-align: center;
+  }
+}
+
+.action {
+  display: flex;
+  gap: 2px;
+  flex-direction: row;
+}
