@@ -1,14 +1,26 @@
 {
-  "name": "tm-backup",
-  "version": "0.0.0",
-  "description": "This is the description of the plugin.",
+  "name": "@strapi/plugin-self-backup",
+  "version": "1.0.0",
+  "description": "Backup your local data",
   "license": "MIT",
   "author": {
-    "name": "A Strapi developer"
+    "name": "Truyen Mai"
+  },
+  "strapi": {
+    "name": "tm-backup",
+    "description": "Serves for backup on local server",
+    "kind": "plugin",
+    "displayName": "Self Backup"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/handwithfivefingers/self-backup.git"
   },
   "maintainers": [
     {
-      "name": "A Strapi developer"
+      "name": "Truyen Mai",
+      "email": "handgod1995@gmail.com",
+      "url": "https://truyenmai.com"
     }
   ],
   "dependencies": {
@@ -30,16 +42,11 @@
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^5.2.0",
-    "styled-components": "^5.2.1"
+    "styled-components": "^5.2.1",
+    "@strapi/strapi": "^4.0.0"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
-  },
-  "strapi": {
-    "name": "tm-backup",
-    "description": "Description of Tm Backup plugin",
-    "kind": "plugin",
-    "displayName": "Self Backup"
   }
 }
