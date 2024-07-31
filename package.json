@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/handwithfivefingers/self-backup.git"
+    "url": "git+https://github.com/handwithfivefingers/strapi-plugin-self-backup.git"
   },
   "maintainers": [
     "Truyen Mai <handgod1995@gmail.com> (https://truyenmai.com)"
@@ -44,9 +44,9 @@
     "npm": ">=6.0.0"
   },
   "bugs": {
-    "url": "https://github.com/handwithfivefingers/self-backup/issues"
+    "url": "https://github.com/handwithfivefingers/strapi-plugin-self-backup/issues"
   },
-  "homepage": "https://github.com/handwithfivefingers/self-backup#readme",
+  "homepage": "https://github.com/handwithfivefingers/strapi-plugin-self-backup#readme",
   "main": "strapi-admin.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
