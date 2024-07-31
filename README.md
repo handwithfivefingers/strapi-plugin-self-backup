@@ -1,6 +1,32 @@
 # Strapi plugin Self Backup
 
 Backup your data without any provider
+### Install
+```
+npm install @handwithfivefingers/strapi-plugin-self-backup
+```
+
+### Turn it on
+At `rootDir/config/plugins.js`
+```
+"tm-backup": {
+  enabled: true
+}
+```
+At `rootDir/.env` need `DATABASE_PASSWORD` available
+```
+DATABASE_PASSWORD=xxx
+```
+
+Create `backup` folder
+
+```
+.
+├── rootDir
+│   └── file12.ext
+└── backup
+
+```
 
 ### Features
 ![Dashboard](./images/dashboard.png?raw=true "Dashboard")
@@ -20,12 +46,5 @@ Backup your data without any provider
 - [ ] Push backup file to Storage Provider when backup created
 - [ ] Schedule remove old backup
 
-### First thing
+### Warning
 - You need to create `backup` folder same level at rootDir to avoid restart
-```
-.
-├── rootDir
-│   └── file12.ext
-└── backup
-
-```
