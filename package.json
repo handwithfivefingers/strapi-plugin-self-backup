@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "Backup your local data",
   "license": "MIT",
-  "author": {
-    "name": "Truyen Mai"
-  },
+  "author": "Truyen Mai",
   "strapi": {
     "name": "tm-backup",
     "description": "Serves for backup on local server",
@@ -14,14 +12,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/handwithfivefingers/self-backup.git"
+    "url": "git+https://github.com/handwithfivefingers/self-backup.git"
   },
   "maintainers": [
-    {
-      "name": "Truyen Mai",
-      "email": "handgod1995@gmail.com",
-      "url": "https://truyenmai.com"
-    }
+    "Truyen Mai <handgod1995@gmail.com> (https://truyenmai.com)"
   ],
   "dependencies": {
     "@strapi/design-system": "^1.6.3",
@@ -48,5 +42,17 @@
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/handwithfivefingers/self-backup/issues"
+  },
+  "homepage": "https://github.com/handwithfivefingers/self-backup#readme",
+  "main": "strapi-admin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Strapi",
+    "Backup"
+  ]
 }
