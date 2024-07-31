@@ -1,5 +1,5 @@
 {
-  "name": "@strapi/plugin-self-backup",
+  "name": "@handwithfivefingers/strapi-plugin-self-backup",
   "version": "1.0.0",
   "description": "Backup your local data",
   "license": "MIT",
