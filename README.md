@@ -21,7 +21,7 @@ Backup your data without any provider
 - [ ] Schedule remove old backup
 
 ### First thing
-- You need to create backup folder same level at rootDir to avoid restart
+- You need to create `backup` folder same level at rootDir to avoid restart
 ```
 .
 ├── rootDir

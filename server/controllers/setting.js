@@ -1,11 +1,11 @@
 "use strict";
 
+const { SETTING_SERVICE, PLUGIN_NAME } = require("../constant");
 const { getService } = require("../utils");
-const PLUGIN_NAME = "tm-backup";
 
 module.exports = ({ strapi }) => ({
   getSettings: async (ctx) => {
-    const config = await getService("setting").getConfig();
+    const config = await getService(SETTING_SERVICE).getConfig();
     ctx.send({ data: config });
   },
   updateSettings: async (ctx) => {
@@ -32,28 +32,14 @@ module.exports = ({ strapi }) => ({
       strapi.cron.add({
         [PLUGIN_NAME]: {
           task: () => {
-            getService("backup").createBackup(
-              bundleIdentifier,
-              manual,
-              backupDB,
-              backupUploads,
-              backupPath
-            );
-            console.log("TRIGGER TASK SUCCESS");
+            getService("backup").createBackup(bundleIdentifier, manual, backupDB, backupUploads, backupPath);
           },
           options: {
-            rule:
-              process.env.NODE_ENV === "development"
-                ? "0,30 * * * * *"
-                : data?.scheduleTime,
+            rule: data?.scheduleTime || "0 0 * * 1-7",
           },
         },
       });
     }
-
-    // const defaultSetting = await getService("setting").getConfig();
-    // console.log("defaultSetting", defaultSetting);
-
     ctx.send({ ok: true });
   },
 });
