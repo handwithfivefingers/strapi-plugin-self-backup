@@ -1,3 +1,4 @@
+// @ts-nocheck
 // 'use strict';
 
 const { BACKUP_SERVICE } = require("../constant");
@@ -44,7 +45,16 @@ module.exports = createCoreController("plugin::tm-backup.backup-setting", ({ str
     ctx.status = 200;
   },
   deleteBackup: async (ctx) => {
-    const backup = await getService("backup").deleteBackup({
+    const backup = await getService("backup").getByID({
+      id: ctx.params.id,
+    });
+    if (backup) {
+      if (fs.existsSync(backup.backupPath)) {
+        const fileLocation = `${backup.backupPath}`;
+        fs.unlinkSync(fileLocation);
+      }
+    }
+    await getService("backup").deleteBackup({
       id: ctx.params.id,
     });
     ctx.send({ status: "successs" });

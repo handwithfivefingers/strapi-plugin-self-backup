@@ -1,6 +1,6 @@
 {
   "name": "@handwithfivefingers/strapi-plugin-self-backup",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Backup your local data",
   "keywords": [
     "Strapi",

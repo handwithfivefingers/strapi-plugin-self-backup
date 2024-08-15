@@ -1,3 +1,9 @@
+### UPDATING
+- Fixed can't create backup manual (api name issue )
+- Fixed only generate Create Schema 
+- Implemented deleted file before delete on database
+
+
 # Strapi plugin Self Backup
 
 Backup your data without any provider

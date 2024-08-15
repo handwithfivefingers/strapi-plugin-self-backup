@@ -20,6 +20,7 @@
   "backup.scheduleTime.perWeek": "Mỗi Tuần",
   "backup.scheduleTime.perTwoWeek": "2 Tuần",
   "backup.scheduleTime.perThreeWeek": "3 Tuần",
+  "backup.scheduleTime.perMonth": "Mỗi Tháng",
   "backup.table.identifier": "ID Bản sao",
   "backup.table.manual": "Tự động",
   "backup.table.hasDB": "Bao gồm Database",
