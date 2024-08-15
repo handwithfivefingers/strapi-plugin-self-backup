@@ -1,22 +1,28 @@
 {
   "name": "@handwithfivefingers/strapi-plugin-self-backup",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Backup your local data",
-  "license": "MIT",
-  "author": "Truyen Mai",
-  "strapi": {
-    "name": "tm-backup",
-    "description": "Serves for backup on local server",
-    "kind": "plugin",
-    "displayName": "Self Backup"
+  "keywords": [
+    "Strapi",
+    "Backup"
+  ],
+  "homepage": "https://github.com/handwithfivefingers/strapi-plugin-self-backup#readme",
+  "bugs": {
+    "url": "https://github.com/handwithfivefingers/strapi-plugin-self-backup/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/handwithfivefingers/strapi-plugin-self-backup.git"
   },
+  "license": "MIT",
+  "author": "Truyen Mai",
   "maintainers": [
     "Truyen Mai <handgod1995@gmail.com> (https://truyenmai.com)"
   ],
+  "main": "strapi-admin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "@strapi/design-system": "^1.6.3",
     "@strapi/helper-plugin": "^4.6.0",
@@ -33,26 +39,20 @@
     "styled-components": "^5.3.6"
   },
   "peerDependencies": {
+    "@strapi/strapi": "^4.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^5.2.0",
-    "styled-components": "^5.2.1",
-    "@strapi/strapi": "^4.0.0"
+    "styled-components": "^5.2.1"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
-  "bugs": {
-    "url": "https://github.com/handwithfivefingers/strapi-plugin-self-backup/issues"
-  },
-  "homepage": "https://github.com/handwithfivefingers/strapi-plugin-self-backup#readme",
-  "main": "strapi-admin.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "Strapi",
-    "Backup"
-  ]
+  "strapi": {
+    "name": "tm-backup",
+    "description": "Serves for backup on local server",
+    "kind": "plugin",
+    "displayName": "Self Backup"
+  }
 }
