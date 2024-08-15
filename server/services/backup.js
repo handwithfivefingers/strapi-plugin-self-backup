@@ -35,12 +35,7 @@ module.exports = createCoreService("plugin::tm-backup.backup-setting", {
       },
     });
   },
-  createBackup: async (
-    bundleIdentifier = null,
-    manual = true,
-    backupDB = true,
-    backupUploads = true
-  ) => {
+  createBackup: async (bundleIdentifier = null, manual = true, backupDB = true, backupUploads = true) => {
     if (!bundleIdentifier) {
       throw Error("You must provide a backup identifier to use this API.");
     }
@@ -48,9 +43,7 @@ module.exports = createCoreService("plugin::tm-backup.backup-setting", {
     const backupTempPath = path.join(rootDir, "..", "backup", bundleIdentifier);
     await fs.mkdir(backupTempPath, (err) => {
       if (err) {
-        throw Error(
-          `Unhandled to create backup path. error: ${err.toString()}`
-        );
+        throw Error(`Unhandled to create backup path. error: ${err.toString()}`);
       }
       strapi.log.info("Backup directory created successfully!");
     });
@@ -92,38 +85,25 @@ module.exports = createCoreService("plugin::tm-backup.backup-setting", {
       data: createdEntry,
     };
   },
-  bundleBackup: async ({
-    bundleIdentifier,
-    manual = true,
-    hasDB = true,
-    hasUploads = true,
-    dbEngine,
-  }) => {
+  bundleBackup: async ({ bundleIdentifier, manual = true, hasDB = true, hasUploads = true, dbEngine }) => {
     try {
       const rootDir = process.cwd();
       const bundleFolder = path.join(rootDir, "..", "backup", bundleIdentifier);
-      const zipFolder = path.join(
-        rootDir,
-        "..",
-        "backup",
-        `${bundleIdentifier}.zip`
-      );
+      const zipFolder = path.join(rootDir, "..", "backup", `${bundleIdentifier}.zip`);
       await getService(SERVICE_NAME).zipFolderToFile(bundleFolder, zipFolder);
 
       const fileStats = fs.statSync(zipFolder);
-      const entity = await strapi.db
-        .query("plugin::tm-backup.backup-setting")
-        .create({
-          data: {
-            identifier: bundleIdentifier,
-            backupPath: zipFolder,
-            hasDB,
-            hasUploads,
-            manual,
-            size: fileStats.size / (1024 * 1024),
-            dbEngine: dbEngine,
-          },
-        });
+      const entity = await strapi.db.query("plugin::tm-backup.backup-setting").create({
+        data: {
+          identifier: bundleIdentifier,
+          backupPath: zipFolder,
+          hasDB,
+          hasUploads,
+          manual,
+          size: fileStats.size / (1024 * 1024),
+          dbEngine: dbEngine,
+        },
+      });
       // const sanitizedEntity = await sanitizeEntity(entity);
 
       return {
@@ -147,13 +127,7 @@ module.exports = createCoreService("plugin::tm-backup.backup-setting", {
   backupMysql: async (bundleIdentifier, settings) => {
     strapi.log.info("Starting bookshelf backup from", settings.host);
     const rootDir = process.cwd();
-    const pathToDatabaseBackup = path.join(
-      rootDir,
-      "..",
-      "backup",
-      bundleIdentifier,
-      "/database.sql"
-    );
+    const pathToDatabaseBackup = path.join(rootDir, "..", "backup", bundleIdentifier, "/database.sql");
     strapi.log.info("Dumping to", pathToDatabaseBackup);
     const res = await mysqldump({
       connection: {
@@ -164,15 +138,19 @@ module.exports = createCoreService("plugin::tm-backup.backup-setting", {
         database: settings.database,
       },
       // dumpToFile: filePath,
+      compressFile: true,
+      // dumpToFile: pathToDatabaseBackup,
     });
 
+    await fs.appendFileSync(pathToDatabaseBackup, `SET FOREIGN_KEY_CHECKS = 0;\n\n`);
     await fs.appendFileSync(pathToDatabaseBackup, `${res.dump.schema}\n\n`);
+    await fs.appendFileSync(pathToDatabaseBackup, `${res.dump.data}\n\n`);
+    await fs.appendFileSync(pathToDatabaseBackup, `SET FOREIGN_KEY_CHECKS = 1;\n\n`);
 
     return {
       status: "success",
       content: res,
       message: "db backup succesfully created",
-      backupUrl: "https://google.com/zip",
     };
   },
   deleteBackupBundle: async (bundlePath) => {
@@ -185,17 +163,8 @@ module.exports = createCoreService("plugin::tm-backup.backup-setting", {
   },
   backupUploads: async (bundleIdentifier) => {
     const rootDir = process.cwd();
-    const pathToDatabaseBackup = path.join(
-      rootDir,
-      "..",
-      "backup",
-      bundleIdentifier,
-      "uploads.zip"
-    );
-    const savedFile = await getService(SERVICE_NAME).zipFolderToFile(
-      `${rootDir}/public/uploads`,
-      pathToDatabaseBackup
-    );
+    const pathToDatabaseBackup = path.join(rootDir, "..", "backup", bundleIdentifier, "uploads.zip");
+    const savedFile = await getService(SERVICE_NAME).zipFolderToFile(`${rootDir}/public/uploads`, pathToDatabaseBackup);
 
     return { status: "success", backupPath: savedFile };
   },

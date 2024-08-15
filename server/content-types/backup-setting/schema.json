@@ -1,6 +1,6 @@
 {
   "kind": "collectionType",
-  "collectionName": "Backup Setting",
+  "collectionName": "backup-setting",
   "info": {
     "singularName": "backup-setting",
     "pluralName": "backup-settings",
