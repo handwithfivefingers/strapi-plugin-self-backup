@@ -2,7 +2,10 @@
 - Fixed can't create backup manual (api name issue )
 - Fixed only generate Create Schema 
 - Implemented deleted file before delete on database
-
+- Lite SQL Backup
+- Schedule remove old backup
+- Now Entity will create first and update file when file generated successfully ( avoid freeze browser, unable to generate file )
+- 
 
 # Strapi plugin Self Backup
 
@@ -44,13 +47,14 @@ Create `backup` folder
 - [x] mysql Backup
 - [x] Manual create backup
 - [x] Delete/Download
+- [x] Lite SQL Backup
+- [x] Schedule remove old backup
+
 
 ### Todo
-- [ ] Lite SQL Backup
 - [ ] Postgrest SQL Backup
 - [ ] Automatic send mail when backup created 
 - [ ] Push backup file to Storage Provider when backup created
-- [ ] Schedule remove old backup
 
 ### Warning
 - You need to create `backup` folder same level at rootDir to avoid restart

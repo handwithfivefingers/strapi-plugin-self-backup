@@ -24,15 +24,21 @@ module.exports = ({ strapi }) => ({
       strapi.cron.remove(PLUGIN_NAME);
     }
     if (data.manual) {
-      const bundleIdentifier = Date.now().toString();
-      const backupDB = true;
-      const backupUploads = true;
       const manual = true;
       const backupPath = data.localePath || "../";
       strapi.cron.add({
         [PLUGIN_NAME]: {
-          task: () => {
-            getService("backup").createBackup(bundleIdentifier, manual, backupDB, backupUploads, backupPath);
+          task: async () => {
+            const setting = await getService(SETTING_SERVICE).getConfig();
+            const bundleIdentifier = Date.now().toString();
+            getService("backup").createBackup(
+              bundleIdentifier,
+              manual,
+              setting.hasDB,
+              setting.hasUploads,
+              backupPath,
+              setting.autoRemove
+            );
           },
           options: {
             rule: data?.scheduleTime || "0 0 * * 1-7",

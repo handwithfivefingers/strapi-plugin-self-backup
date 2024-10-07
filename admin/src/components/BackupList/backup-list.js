@@ -1,16 +1,5 @@
 // @ts-nocheck
-import {
-  Switch,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  Typography,
-  Button,
-  Box,
-} from "@strapi/design-system";
+import { Switch, Table, Tbody, Td, Th, Thead, Tr, Typography, Button, Box } from "@strapi/design-system";
 import styles from "./styles.module.css";
 import { useTrans } from "../../utils/useTrans";
 const parseDate = (dateStr) => {
@@ -53,20 +42,21 @@ const BackupList = ({ data, handleDownload, handleDelete }) => {
     {
       title: trans("backup.table.size"),
       dataIndex: "size",
-      render: (record) => (
-        <Typography size="s">{record.size?.toFixed(2) + " MB"}</Typography>
-      ),
+      render: (record) => <Typography size="s">{record.size?.toFixed(2) + " MB"}</Typography>,
     },
     {
       title: trans("backup.table.dbEngine"),
       dataIndex: "dbEngine",
     },
     {
+      title: "Status",
+      dataIndex: "size",
+      render: (record) => <Typography size="s">{Number(record.size) !== 0 ? "Ready" : "Pending..."}</Typography>,
+    },
+    {
       title: trans("backup.table.createdAt"),
       dataIndex: "createdAt",
-      render: (record) => (
-        <Typography size="s">{parseDate(record?.createdAt)}</Typography>
-      ),
+      render: (record) => <Typography size="s">{parseDate(record?.createdAt)}</Typography>,
     },
     {
       title: "Action",
@@ -74,18 +64,10 @@ const BackupList = ({ data, handleDownload, handleDelete }) => {
       render: (record) => {
         return (
           <div className={styles.action}>
-            <Button
-              onClick={() => handleDelete(record)}
-              size="S"
-              variant="danger-light"
-            >
+            <Button onClick={() => handleDelete(record)} size="S" variant="danger-light">
               {trans("backup.Button.delete")}
             </Button>
-            <Button
-              onClick={() => handleDownload(record)}
-              size="S"
-              variant="ghost"
-            >
+            <Button onClick={() => handleDownload(record)} size="S" variant="ghost">
               {trans("backup.Button.download")}
             </Button>
           </div>
@@ -113,11 +95,7 @@ const BackupList = ({ data, handleDownload, handleDelete }) => {
                     {item.render ? (
                       item.render(row)
                     ) : item.type === "boolean" ? (
-                      <Switch
-                        selected={row[item.dataIndex]}
-                        className={styles.switch}
-                        size="S"
-                      />
+                      <Switch selected={row[item.dataIndex]} className={styles.switch} size="S" />
                     ) : (
                       <Typography textColor="neutral800" size="S">
                         {row[item.dataIndex]}

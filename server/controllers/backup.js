@@ -19,16 +19,16 @@ module.exports = createCoreController("plugin::tm-backup.backup-setting", ({ str
       const backupDB = ctx.request?.body?.hasDB;
       const backupUploads = ctx.request?.body?.hasUploads;
       const manual = false;
-      const result = await getService("backup").createBackup(bundleIdentifier, manual, backupDB, backupUploads);
-      if (result.status === "success") {
-        ctx.send({
-          created: result.data,
-        });
-      } else {
-        ctx.send({
-          ...result,
-        });
-      }
+      const autoRemove = false;
+      return getService("backup")
+        .createBackup(bundleIdentifier, manual, backupDB, backupUploads, autoRemove)
+        .then((res) => {
+          return ctx.send(res);
+        })
+        .catch((error) => {
+          return ctx.send(error);
+        })
+
     } catch (error) {
       strapi.log.error(error);
       ctx.send({ status: "failure", message: error.toString() });
@@ -45,15 +45,6 @@ module.exports = createCoreController("plugin::tm-backup.backup-setting", ({ str
     ctx.status = 200;
   },
   deleteBackup: async (ctx) => {
-    const backup = await getService("backup").getByID({
-      id: ctx.params.id,
-    });
-    if (backup) {
-      if (fs.existsSync(backup.backupPath)) {
-        const fileLocation = `${backup.backupPath}`;
-        fs.unlinkSync(fileLocation);
-      }
-    }
     await getService("backup").deleteBackup({
       id: ctx.params.id,
     });

@@ -23,6 +23,8 @@ import React, { memo, useEffect, useState } from "react";
 import BackupList from "../../components/BackupList/backup-list";
 import pluginId from "../../pluginId";
 import { useTrans } from "../../utils/useTrans";
+import { useAPI } from "../../utils/useAPI";
+import api from "../../../../../../../config/api";
 
 const INIT_FORM = {
   hasDB: false,
@@ -36,6 +38,9 @@ const HomePage = () => {
   const [data, setData] = useState([]);
   const [form, setForm] = useState(INIT_FORM);
   const [loading, setLoading] = useState(false);
+
+  const apis = useAPI();
+
   useEffect(() => {
     getScreenData();
   }, []);
@@ -43,7 +48,8 @@ const HomePage = () => {
   const getScreenData = async () => {
     try {
       setLoading(true);
-      const resp = await request.get("/tm-backup/backups");
+      // const resp = await request.get("/tm-backup/backups");
+      const resp = await apis.getBackups();
       setData(resp.data);
     } catch (error) {
       console.log("Get error", error);
@@ -64,10 +70,10 @@ const HomePage = () => {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
       };
-      const resp = await request.get(`${pluginId}/backup/${record.id}`, {
-        responseType: "blob",
-      });
-
+      // const resp = await request.get(`${pluginId}/backup/${record.id}`, {
+      //   responseType: "blob",
+      // });
+      const resp = await apis.getBackupID(record);
       download(resp.data, `backup_${record.identifier}.zip`);
     } catch (error) {
       console.log("error", error);
@@ -76,8 +82,9 @@ const HomePage = () => {
 
   const handleDelete = async (record) => {
     try {
-      const resp = await request.del(`${pluginId}/backup/${record.id}`);
-      console.log("resp", resp);
+      // const resp = await request.del(`${pluginId}/backup/${record.id}`);
+      // console.log("resp", resp);
+      await apis.delBackupID(record);
       getScreenData();
     } catch (error) {
       console.log("error", error);
@@ -91,9 +98,7 @@ const HomePage = () => {
   const submitForm = async () => {
     try {
       setLoading(true);
-      console.log("submit");
-      const resp = await request.post(`/${pluginId}/backup`, form);
-      console.log("resp", resp);
+      const resp = await apis.createBackup(form);
       onCancel();
       getScreenData();
     } catch (error) {
@@ -106,7 +111,6 @@ const HomePage = () => {
     setOpen(false);
     setForm(INIT_FORM);
   };
-  console.log("theme", theme);
   return (
     <div style={{ padding: "18px 30px 66px 30px" }}>
       <Typography tag="h1" variant="alpha" textColor="neutral800">
@@ -123,16 +127,10 @@ const HomePage = () => {
         {(loading && <LoadingScreen />) || ""}
 
         <div>
-          <Button onClick={() => setOpen(true)}>
-            {trans("backup.Button.create")}
-          </Button>
+          <Button onClick={() => setOpen(true)}>{trans("backup.Button.create")}</Button>
         </div>
 
-        <BackupList
-          data={data}
-          handleDownload={handleDownload}
-          handleDelete={handleDelete}
-        />
+        <BackupList data={data} handleDownload={handleDownload} handleDelete={handleDelete} />
 
         {(open && (
           <ModalLayout onClose={() => setOpen(false)}>
@@ -167,11 +165,7 @@ const HomePage = () => {
             </ModalBody>
             <ModalFooter
               startActions={
-                <Button
-                  onClick={() => onCancel()}
-                  variant="tertiary"
-                  loading={loading}
-                >
+                <Button onClick={() => onCancel()} variant="tertiary" loading={loading}>
                   {trans("backup.Button.cancel")}
                 </Button>
               }

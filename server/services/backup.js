@@ -3,16 +3,14 @@
 
 const { createCoreService } = require("@strapi/strapi").factories;
 const fs = require("fs");
-const archiver = require("archiver");
-const mysqldump = require("mysqldump");
 const path = require("path");
-const { sanitize } = require("@strapi/utils");
-const { getService, getCoreStore } = require("../utils");
+const { getService, compressUploads, compressSql, zipFolder, compressSqlite } = require("../utils");
+const { exec } = require("child_process");
+const { SETTING_SERVICE } = require("../constant");
 /**
  *  service
  */
 
-const PLUGIN_NAME = "tm-backup";
 const SERVICE_NAME = "backup";
 
 module.exports = createCoreService("plugin::tm-backup.backup-setting", {
@@ -29,6 +27,8 @@ module.exports = createCoreService("plugin::tm-backup.backup-setting", {
     });
   },
   deleteBackup: async ({ id }) => {
+    const entity = await getService(SERVICE_NAME).getByID({ id });
+    getService(SERVICE_NAME).deleteSideEffect(entity.backupPath);
     return await strapi.db.query("plugin::tm-backup.backup-setting").delete({
       where: {
         id: id,
@@ -36,151 +36,129 @@ module.exports = createCoreService("plugin::tm-backup.backup-setting", {
     });
   },
   createBackup: async (bundleIdentifier = null, manual = true, backupDB = true, backupUploads = true) => {
-    if (!bundleIdentifier) {
-      throw Error("You must provide a backup identifier to use this API.");
-    }
-    const rootDir = process.cwd();
-    const backupTempPath = path.join(rootDir, "..", "backup", bundleIdentifier);
-    await fs.mkdir(backupTempPath, (err) => {
-      if (err) {
-        throw Error(`Unhandled to create backup path. error: ${err.toString()}`);
-      }
-      strapi.log.info("Backup directory created successfully!");
-    });
-
-    /**
-     * client
-     * connection
-     * pool
-     * acquireConnectionTimeout
-     */
-    const dbConnection = strapi.config.database.connection;
-    let res;
-    if (dbConnection.client === "mysql") {
-      res = await getService(SERVICE_NAME).backupMysql(bundleIdentifier, {
-        ...dbConnection.connection,
-        password: process.env.DATABASE_PASSWORD,
-      });
-    }
-
-    if (backupUploads) {
-      await getService(SERVICE_NAME).backupUploads(bundleIdentifier);
-    }
-
-    const createdEntry = await getService(SERVICE_NAME).bundleBackup({
-      bundleIdentifier,
-      manual,
-      hasDB: backupDB,
-      hasUploads: backupUploads,
-      dbEngine: dbConnection.client,
-    });
-
-    await fs.rmdirSync(backupTempPath, { recursive: true });
-
-    return {
-      bundleIdentifier,
-      manual,
-      backupDB,
-      backupUploads,
-      data: createdEntry,
-    };
-  },
-  bundleBackup: async ({ bundleIdentifier, manual = true, hasDB = true, hasUploads = true, dbEngine }) => {
+    const targetBundle = [];
     try {
+      if (!bundleIdentifier) {
+        throw Error("You must provide a backup identifier to use this API.");
+      }
       const rootDir = process.cwd();
-      const bundleFolder = path.join(rootDir, "..", "backup", bundleIdentifier);
-      const zipFolder = path.join(rootDir, "..", "backup", `${bundleIdentifier}.zip`);
-      await getService(SERVICE_NAME).zipFolderToFile(bundleFolder, zipFolder);
+      const backupTempPath = path.join(rootDir, "..", "backup", bundleIdentifier);
+      await fs.mkdir(backupTempPath, (err) => {
+        if (err) {
+          throw Error(`Unhandled to create backup path. error: ${err.toString()}`);
+        }
+        strapi.log.info("Backup directory created successfully!");
+      });
 
-      const fileStats = fs.statSync(zipFolder);
+      /**
+       * client
+       * connection
+       * pool
+       * acquireConnectionTimeout
+       */
+      const { client, connection } = strapi.config.database.connection;
+      connection.password = process.env.DATABASE_PASSWORD;
+      if (backupDB) {
+        if (client === "mysql") targetBundle.push(compressSql({ bundleIdentifier, connection }));
+        if (client === "sqlite") targetBundle.push(compressSqlite({ bundleIdentifier, connection }));
+      }
+      if (backupUploads) targetBundle.push(compressUploads({ bundleIdentifier }));
+      if (!targetBundle.length) return { status: true, message: "None is select" };
+
       const entity = await strapi.db.query("plugin::tm-backup.backup-setting").create({
         data: {
           identifier: bundleIdentifier,
-          backupPath: zipFolder,
-          hasDB,
-          hasUploads,
+          backupPath: "Pending...",
+          hasDB: backupDB,
+          hasUploads: backupUploads,
           manual,
-          size: fileStats.size / (1024 * 1024),
-          dbEngine: dbEngine,
+          size: 0,
+          dbEngine: client,
         },
       });
-      // const sanitizedEntity = await sanitizeEntity(entity);
 
+      getService(SERVICE_NAME).backupSideEffect({
+        entityID: entity.id,
+        entity,
+        targetBundle,
+        bundleIdentifier,
+      }); // Side Effect
       return {
-        // sanitizedEntity,
-        identifier: bundleIdentifier,
-        backupPath: zipFolder,
-        hasDB,
-        hasUploads,
-        strapiVersion: strapi.config.info.strapi,
-        adminVersion: strapi.config.info.version,
-        size: fileStats.size / (1024 * 1024),
-        manual,
-        dbEngine,
+        ...entity,
+        status: "success",
       };
     } catch (error) {
-      console.log("error", error);
-      throw new Error(error);
+      throw error;
+    } finally {
+      console.log("coming side effect");
     }
   },
 
-  backupMysql: async (bundleIdentifier, settings) => {
-    strapi.log.info("Starting bookshelf backup from", settings.host);
-    const rootDir = process.cwd();
-    const pathToDatabaseBackup = path.join(rootDir, "..", "backup", bundleIdentifier, "/database.sql");
-    strapi.log.info("Dumping to", pathToDatabaseBackup);
-    const res = await mysqldump({
-      connection: {
-        host: settings.host,
-        user: settings.user,
-        port: settings.port,
-        password: settings.password,
-        database: settings.database,
-      },
-      // dumpToFile: filePath,
-      compressFile: true,
-      // dumpToFile: pathToDatabaseBackup,
-    });
-
-    await fs.appendFileSync(pathToDatabaseBackup, `SET FOREIGN_KEY_CHECKS = 0;\n\n`);
-    await fs.appendFileSync(pathToDatabaseBackup, `${res.dump.schema}\n\n`);
-    await fs.appendFileSync(pathToDatabaseBackup, `${res.dump.data}\n\n`);
-    await fs.appendFileSync(pathToDatabaseBackup, `SET FOREIGN_KEY_CHECKS = 1;\n\n`);
-
-    return {
-      status: "success",
-      content: res,
-      message: "db backup succesfully created",
-    };
-  },
-  deleteBackupBundle: async (bundlePath) => {
-    const rootDir = process.cwd();
-    const fullPath = `${rootDir}${bundlePath}`;
-    // ensure exists or throw error
-    await fs.lstat(fullPath, (err) => console.log("err is", err));
-    await fs.unlinkSync(fullPath);
-    return { success: true };
-  },
-  backupUploads: async (bundleIdentifier) => {
-    const rootDir = process.cwd();
-    const pathToDatabaseBackup = path.join(rootDir, "..", "backup", bundleIdentifier, "uploads.zip");
-    const savedFile = await getService(SERVICE_NAME).zipFolderToFile(`${rootDir}/public/uploads`, pathToDatabaseBackup);
-
-    return { status: "success", backupPath: savedFile };
-  },
-  zipFolderToFile: async (pathToFolder, pathToZipFile) => {
-    const output = fs.createWriteStream(pathToZipFile);
-    const archive = archiver("zip", {
-      zlib: { level: 9 }, // Sets the compression level.
-    });
+  backupSideEffect: async ({ entityID, targetBundle, bundleIdentifier }) => {
+    let canDelete = false;
     try {
-      await archive.pipe(output);
-      // append files from a sub-directory, putting its contents at the root of archive
-      await archive.directory(pathToFolder, false);
-      await archive.finalize();
-    } catch (err) {
-      throw Error(`Unable to create zip file. error: ${err.toString()}`);
+      if (!entityID) return;
+      const [isCompressSQL, isCompressUploads] = await Promise.all(targetBundle);
+      if (!isCompressSQL && !isCompressUploads) return;
+      const rootDir = process.cwd();
+
+      const bundleFolder = path.join(rootDir, "..", "backup", bundleIdentifier);
+      const targetFolder = path.join(rootDir, "..", "backup", `${bundleIdentifier}.zip`);
+      // Zip FOLDER
+      await zipFolder(bundleFolder, targetFolder);
+      // Remove Folder
+      getService(SERVICE_NAME).deleteSideEffect(bundleFolder);
+
+      let fileStats = fs.statSync(targetFolder);
+
+      await strapi.db.query("plugin::tm-backup.backup-setting").update({
+        where: {
+          id: entityID,
+        },
+        data: {
+          backupPath: targetFolder,
+          size: fileStats.size / (1024 * 1024),
+        },
+      });
+      canDelete = true;
+    } catch (error) {
+      console.log("Side Effect error ", error);
+      canDelete = false;
+    } finally {
+      if (canDelete) {
+        const setting = await getService(SETTING_SERVICE).getConfig();
+        console.log("can delete and setting is", setting);
+        if (setting.autoRemove) {
+          const record = await strapi.db.query("plugin::tm-backup.backup-setting").findMany({
+            filters: {
+              id: {
+                $lt: entityID,
+              },
+            },
+          });
+          for (let r of record) {
+            console.log("DELETE ", r.id);
+            getService(SERVICE_NAME).deleteSideEffect(r.backupPath);
+            await strapi.db.query("plugin::tm-backup.backup-setting").delete({ where: { id: r.id } });
+          }
+        }
+      }
     }
-    return output.path;
+  },
+
+  deleteSideEffect: async (target) => {
+    try {
+      const stats = fs.lstatSync(target);
+      if (stats) {
+        fs.unlink(target, (error) => {
+          if (error) {
+            console.log("error", error);
+            exec(`rm -rf ${target}`);
+          }
+        });
+      }
+    } catch (error) {
+      console.log("deleteSideEffect error", error);
+    }
   },
 });

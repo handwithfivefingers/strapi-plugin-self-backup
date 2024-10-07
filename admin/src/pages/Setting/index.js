@@ -1,11 +1,5 @@
 // @ts-nocheck
-import {
-  Grid,
-  GridItem,
-  SingleSelect,
-  SingleSelectOption,
-  ToggleInput,
-} from "@strapi/design-system";
+import { Grid, GridItem, SingleSelect, SingleSelectOption, ToggleInput } from "@strapi/design-system";
 import { useFetchClient } from "@strapi/helper-plugin";
 import { useEffect, useState } from "react";
 import Header from "../../components/Header/header";
@@ -22,6 +16,7 @@ const Setting = () => {
     manual: false,
     hasDB: false,
     hasUploads: false,
+    autoRemove: false,
     scheduleTime: "",
   });
 
@@ -53,7 +48,6 @@ const Setting = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
-      console.log("backupSetting", backupSetting);
       await request.put(`/${pluginId}/setting`, backupSetting);
       setDisabled(true);
     } catch (error) {
@@ -92,31 +86,22 @@ const Setting = () => {
                 }));
               }}
             >
-              <SingleSelectOption value="0 0 * * 1-7">
-                {trans("backup.scheduleTime.daily")}
-              </SingleSelectOption>
-              <SingleSelectOption value="0 0 * * 1/3">
-                {trans("backup.scheduleTime.per3Day")}
-              </SingleSelectOption>
-              <SingleSelectOption value="0 0 * * 1">
-                {trans("backup.scheduleTime.perWeek")}
-              </SingleSelectOption>
-              <SingleSelectOption value="0 0 1,15 * *">
-                {trans("backup.scheduleTime.perTwoWeek")}
-              </SingleSelectOption>
+              {/* <SingleSelectOption value="* * * * *">1 minutes</SingleSelectOption> */}
+              <SingleSelectOption value="0 0 * * 1-7">{trans("backup.scheduleTime.daily")}</SingleSelectOption>
+              <SingleSelectOption value="0 0 * * 1/3">{trans("backup.scheduleTime.per3Day")}</SingleSelectOption>
+              <SingleSelectOption value="0 0 * * 1">{trans("backup.scheduleTime.perWeek")}</SingleSelectOption>
+              <SingleSelectOption value="0 0 1,15 * *">{trans("backup.scheduleTime.perTwoWeek")}</SingleSelectOption>
               <SingleSelectOption value="0 0 1,11,21 * *">
                 {trans("backup.scheduleTime.perThreeWeek")}
               </SingleSelectOption>
-              <SingleSelectOption value="0 0 1 * *">
-                {trans("backup.scheduleTime.perMonth")}
-              </SingleSelectOption>
+              <SingleSelectOption value="0 0 1 * *">{trans("backup.scheduleTime.perMonth")}</SingleSelectOption>
             </SingleSelect>
           ) : (
             ""
           )}
         </GridItem>
 
-        <GridItem col={12} s={12}>
+        <GridItem col={6} s={6}>
           <ToggleInput
             hint={trans("backup.hasDB.description")}
             label={trans("backup.hasDB.label")}
@@ -127,7 +112,21 @@ const Setting = () => {
             onChange={handleChangeManual}
           />
         </GridItem>
-
+        <GridItem col={6} s={6}>
+          {backupSetting?.manual ? (
+            <ToggleInput
+              hint={trans("backup.autoRemove.description")}
+              label={trans("backup.autoRemove.label")}
+              name="autoRemove"
+              onLabel="on"
+              offLabel="off"
+              checked={backupSetting.autoRemove}
+              onChange={handleChangeManual}
+            />
+          ) : (
+            ""
+          )}
+        </GridItem>
         <GridItem col={12} s={12}>
           <ToggleInput
             hint={trans("backup.hasUploads.description")}

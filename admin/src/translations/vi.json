@@ -29,5 +29,7 @@
   "backup.table.backupPath": "Đường dẫn",
   "backup.table.dbEngine": "Công nghệ",
   "backup.table.createdAt": "Ngày tạo",
-  "backup.Modal.create.title": "Tạo bản sao lưu"
+  "backup.Modal.create.title": "Tạo bản sao lưu",
+  "backup.autoRemove.label": "Tự động xóa",
+  "backup.autoRemove.description": "Tự động xóa khi bản sao lưu mới được tạo"
 }

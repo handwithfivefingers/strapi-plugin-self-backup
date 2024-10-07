@@ -32,7 +32,6 @@ module.exports = ({ strapi }) => ({
     if (!config) {
       config = await createDefaultConfig();
     }
-
     return config;
   },
 });

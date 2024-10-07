@@ -29,5 +29,7 @@
   "backup.table.backupPath": "Path",
   "backup.table.dbEngine": "Engine",
   "backup.table.createdAt": "Created At",
-  "backup.Modal.create.title": "Create a Backup"
+  "backup.Modal.create.title": "Create a Backup",
+  "backup.autoRemove.label": "Auto Delete",
+  "backup.autoRemove.description": "Auto delete old Backup when new Backup File created successfully"
 }
