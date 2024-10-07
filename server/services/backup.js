@@ -23,7 +23,9 @@ module.exports = createCoreService("plugin::tm-backup.backup-setting", {
   },
   getByID: async ({ id }) => {
     return await strapi.db.query("plugin::tm-backup.backup-setting").findOne({
-      id: id,
+      where: {
+        id: id,
+      },
     });
   },
   deleteBackup: async ({ id }) => {
